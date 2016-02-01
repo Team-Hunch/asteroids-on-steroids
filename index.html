@@ -1,0 +1,166 @@
+<canvas id="world" width="800" height="600"></canvas>
+
+<script>
+    
+    var canvas = document.getElementById('world');
+    var ctx = canvas.getContext('2d');
+    
+    var ship = new Ship({
+        width: 50,
+        height: 60
+    });
+
+
+    document.addEventListener('keyup', function(event) {
+        switch (event.keyCode) {
+            case 37: {
+                ship.setRotatingLeft(false);
+                break;
+            }
+
+            case 39: {
+                ship.setRotatingRight(false);
+                break;
+            }
+        }
+    }, false);
+    
+    document.addEventListener('keydown', function(event) {
+        switch (event.keyCode) {
+            case 37: {
+                ship.setRotatingLeft(true);
+                break;
+            }
+
+            case 39: {
+                ship.setRotatingRight(true);
+                break;
+            }
+        }
+    }, false);
+    
+    var lastDelta = 0;
+    window.requestAnimationFrame(function loop (delta) {
+        window.requestAnimationFrame(loop);
+        
+        if (lastDelta > 0) {
+            ship.update(delta - lastDelta);
+        }
+        
+        lastDelta = delta
+
+        ctx.clearRect(0, 0, 800, 600);
+        ship.draw(ctx);
+    });
+
+    function* gapMaker(gap) {
+        var totalGap = 0;
+        while(true) {
+            totalGap = totalGap + gap;
+            yield totalGap;
+        }
+    }
+    
+    function Ship(options) {
+        this.x = 200;
+        this.y = 100;
+        
+        this.hasFlame = false;
+        
+        this.angle = 0;
+        this.rotating = 0;
+        this.targetRotating = 0;
+        
+        this.width = options.width
+        this.height = options.height
+    }
+
+    Ship.prototype.update = function (delta) {
+        var diffRotation = this.targetRotating - this.rotating;
+        this.rotating = this.rotating + (diffRotation * delta / 1000);
+        this.angle += this.rotating * delta / 1000;
+    };
+
+    Ship.prototype.draw = function (context) {
+        var midPointX = this.x + this.width / 2;
+        var midPointY = this.y + this.height / 2;
+        var bottomPointY = this.y + this.height;
+
+        context.save();
+
+        context.translate(midPointX, midPointY);
+        context.rotate(this.angle * Math.PI / 180);
+        context.translate(-midPointX, -midPointY);
+        
+        context.strokeStyle = '#000000';
+
+        context.beginPath();
+        context.moveTo(midPointX, this.y);
+        context.lineTo(this.x, bottomPointY);
+        context.lineTo(this.x + this.width, bottomPointY);
+        context.lineTo(midPointX, this.y);
+        context.stroke();
+        
+        
+        if (this.hasFlame) {
+            this.drawFlame(context);
+        }
+        
+        context.restore();
+    };
+
+    Ship.prototype.drawFlame = function (context) {
+        
+        context.save();
+        
+        var flameHeight = 20;
+        
+        
+        var flameGap = this.width / 6;
+        var bottomY = this.y + this.height;
+
+        var maker = gapMaker(flameGap)
+
+        context.beginPath();
+        context.moveTo(this.x, bottomY);
+        
+        for (var i = 0; i < 2; i++) {
+            context.lineTo(this.x + maker.next().value, bottomY + flameHeight);
+            context.lineTo(this.x + maker.next().value, bottomY + flameHeight * 0.4);
+        }
+
+        context.lineTo(this.x + maker.next().value, bottomY + flameHeight);
+        context.lineTo(this.x + maker.next().value, bottomY);
+
+        context.lineWidth = 3;
+        context.strokeStyle = '#ff0000';
+        context.fillStyle = '#ffec48';
+        
+        context.stroke();
+        context.fill();
+        
+        context.restore();
+    }
+    
+    Ship.prototype.setRotatingRight = function (value) {
+        if (value) {
+            this.targetRotating = 300
+        } else {
+            this.targetRotating = 0;
+        }
+
+        this.hasFlame = value;
+    }
+
+    Ship.prototype.setRotatingLeft = function (value) {
+        if (value) {
+            this.targetRotating = -300
+        } else {
+            this.targetRotating = 0;
+        }
+
+        this.hasFlame = value;
+    }
+    
+    
+</script>
