@@ -22,6 +22,11 @@
                 ship.setRotatingRight(false);
                 break;
             }
+
+            case 38: {
+                ship.stopEngine();
+                break;
+            }
         }
     }, false);
     
@@ -34,6 +39,11 @@
 
             case 39: {
                 ship.setRotatingRight(true);
+                break;
+            }
+
+            case 38: {
+                ship.startEngine();
                 break;
             }
         }
@@ -62,47 +72,88 @@
     }
     
     function Ship(options) {
-        this.x = 200;
-        this.y = 100;
+        this._x = 200;
+        this._y = 100;
         
-        this.hasFlame = false;
+        this._velocityX = 0;
+        this._velocityY = 0;
         
-        this.angle = 0;
-        this.rotating = 0;
+        this._enginePower = 0;
+        
+        this._engineRotating = false;
+        
+        this._angle = 90;
+        this._rotating = 0;
         this.targetRotating = 0;
         
-        this.width = options.width
-        this.height = options.height
+        this.width = options.width;
+        this.height = options.height;
     }
+    
+    Ship.prototype.applyEngineForce = function () {
+        var degree = this._angle * Math.PI / 180;
+        var engineForceX = Math.sin(degree) * this._enginePower;
+        var engineForceY = - Math.cos(degree) * this._enginePower;
+
+        this._velocityX += engineForceX;
+        this._velocityY += engineForceY;
+    };
 
     Ship.prototype.update = function (delta) {
-        var diffRotation = this.targetRotating - this.rotating;
-        this.rotating = this.rotating + (diffRotation * delta / 1000);
-        this.angle += this.rotating * delta / 1000;
+        var timeScale = delta / 1000;
+        var diffRotation = this.targetRotating - this._rotating;
+        this._rotating += (diffRotation * timeScale);
+        this._angle += this._rotating * timeScale;
+        
+        this.applyEngineForce();
+        
+        this._x += this._velocityX * timeScale;
+        this._y += this._velocityY * timeScale;
+        
+        var velocityXLossPerHalfSecond = 0.9 * this._velocityX;
+        var velocityYLossPerHalfSecond = 0.9 * this._velocityY;
+
+        this._velocityX -= velocityXLossPerHalfSecond * timeScale * 2;
+        this._velocityY -= velocityYLossPerHalfSecond * timeScale * 2;
+        
+        this.wrapPosition(800, 600);
+    };
+    
+    Ship.prototype.wrapPosition = function (width, height) {
+        if (this._x < (0 - this.width)) {
+            this._x += width + this.width;
+        } else if (this._x > width){
+            this._x -= width + this.width;
+        }
+        
+        if (this._y < (0 - this.height)) {
+            this._y += height + this.height;
+        } else if (this._y > height){
+            this._y -= height + this.height;
+        }
     };
 
     Ship.prototype.draw = function (context) {
-        var midPointX = this.x + this.width / 2;
-        var midPointY = this.y + this.height / 2;
-        var bottomPointY = this.y + this.height;
+        var midPointX = this._x + this.width / 2;
+        var midPointY = this._y + this.height / 2;
+        var bottomPointY = this._y + this.height;
 
         context.save();
 
         context.translate(midPointX, midPointY);
-        context.rotate(this.angle * Math.PI / 180);
+        context.rotate(this._angle * Math.PI / 180);
         context.translate(-midPointX, -midPointY);
         
         context.strokeStyle = '#000000';
 
         context.beginPath();
-        context.moveTo(midPointX, this.y);
-        context.lineTo(this.x, bottomPointY);
-        context.lineTo(this.x + this.width, bottomPointY);
-        context.lineTo(midPointX, this.y);
+        context.moveTo(midPointX, this._y);
+        context.lineTo(this._x, bottomPointY);
+        context.lineTo(this._x + this.width, bottomPointY);
+        context.lineTo(midPointX, this._y);
         context.stroke();
         
-        
-        if (this.hasFlame) {
+        if (this._engineRotating || this._enginePower > 0.5) {
             this.drawFlame(context);
         }
         
@@ -115,22 +166,21 @@
         
         var flameHeight = 20;
         
-        
         var flameGap = this.width / 6;
-        var bottomY = this.y + this.height;
+        var bottomY = this._y + this.height;
 
         var maker = gapMaker(flameGap)
 
         context.beginPath();
-        context.moveTo(this.x, bottomY);
+        context.moveTo(this._x, bottomY);
         
         for (var i = 0; i < 2; i++) {
-            context.lineTo(this.x + maker.next().value, bottomY + flameHeight);
-            context.lineTo(this.x + maker.next().value, bottomY + flameHeight * 0.4);
+            context.lineTo(this._x + maker.next().value, bottomY + flameHeight);
+            context.lineTo(this._x + maker.next().value, bottomY + flameHeight * 0.4);
         }
 
-        context.lineTo(this.x + maker.next().value, bottomY + flameHeight);
-        context.lineTo(this.x + maker.next().value, bottomY);
+        context.lineTo(this._x + maker.next().value, bottomY + flameHeight);
+        context.lineTo(this._x + maker.next().value, bottomY);
 
         context.lineWidth = 3;
         context.strokeStyle = '#ff0000';
@@ -149,7 +199,7 @@
             this.targetRotating = 0;
         }
 
-        this.hasFlame = value;
+        this._engineRotating = value;
     }
 
     Ship.prototype.setRotatingLeft = function (value) {
@@ -159,8 +209,15 @@
             this.targetRotating = 0;
         }
 
-        this.hasFlame = value;
-    }
+        this._engineRotating = value;
+    };
     
+    Ship.prototype.startEngine = function () {
+        this._enginePower = 20;
+    };
+
+    Ship.prototype.stopEngine = function () {
+        this._enginePower = 0;
+    };
     
 </script>
