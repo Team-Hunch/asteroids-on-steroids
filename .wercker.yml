@@ -12,7 +12,6 @@ build:
 
 deploy:
   steps:
-    - uetchy/gh-pages:
+    - hijonathan/gh-pages@0.2.3:
         token: $GITHUB_TOKEN
         repo: Team-Hunch/asteroids-on-steroids
-        path: .
