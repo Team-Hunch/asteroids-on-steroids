@@ -2,8 +2,14 @@ box: node
 build:
   steps:
     - npm-install
+    
+    - script:
+        name: build assets
+        code: |
+          npm run build
+          
     - npm-test
-
+    
     - script:
         name: echo nodejs information
         code: |
@@ -15,3 +21,4 @@ deploy:
     - hijonathan/gh-pages@0.2.3:
         token: $GITHUB_TOKEN
         repo: Team-Hunch/asteroids-on-steroids
+        basedir: build
