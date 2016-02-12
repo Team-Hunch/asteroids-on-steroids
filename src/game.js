@@ -58,11 +58,65 @@ window.requestAnimationFrame(function loop (delta) {
     ship.draw(ctx);
 });
 
-function* gapMaker(gap) {
-    var totalGap = 0;
-    while(true) {
-        totalGap = totalGap + gap;
-        yield totalGap;
+
+
+function rotatePointAroundCenter(point, center, angle) {
+    var theta = angle * Math.PI / 180;
+    var x = point.x;
+    var y = point.y;
+    var x0 = center.x;
+    var y0 = center.y;
+
+
+    var x2 = x0 + (x - x0) * Math.cos(theta) - (y - y0) * Math.sin(theta);
+    var y2 = y0 + (x - x0) * Math.sin(theta) + (y - y0) * Math.cos(theta);
+
+     return {
+         x: x2,
+         y: y2
+     }
+}
+
+function calculateTriangleBoundingBox(x, y, w, h, angle) {
+
+    var maxX = null, maxY = null, minX = null, minY = null;
+
+    var center = {
+        x: x + w / 2,
+        y: y + h / 2
+    }
+
+    var corners = [
+        { x: x + w / 2, y: y },
+        { x: x, y: y + h },
+        { x: x + w, y: y + h }
+    ]
+
+    corners.forEach(function (point) {
+        var rotatedPoint = rotatePointAroundCenter(point, center, angle);
+
+        if (rotatedPoint.x > maxX || maxX == null) {
+            maxX = rotatedPoint.x
+        }
+
+        if (rotatedPoint.y > maxY || maxY == null) {
+            maxY = rotatedPoint.y
+        }
+
+        if (rotatedPoint.x < minX || minX == null) {
+            minX = rotatedPoint.x
+        }
+
+        if (rotatedPoint.y < minY || minY == null) {
+            minY = rotatedPoint.y
+        }
+    })
+
+    return {
+        x: minX,
+        y: minY,
+        width: maxX - minX,
+        height: maxY - minY
     }
 }
 
@@ -77,12 +131,19 @@ function Ship(options) {
 
     this._engineRotating = false;
 
-    this._angle = 90;
+    this._angle = 0;
     this._rotating = 0;
     this.targetRotating = 0;
 
     this.width = options.width;
     this.height = options.height;
+
+    this.bounds = {
+        x: this._x,
+        y: this._y,
+        width: this.width,
+        height: this.height
+    }
 }
 
 Ship.prototype.applyEngineForce = function () {
@@ -112,6 +173,8 @@ Ship.prototype.update = function (delta) {
     this._velocityY -= velocityYLossPerHalfSecond * timeScale * 2;
 
     this.wrapPosition(800, 600);
+
+    this.bounds = calculateTriangleBoundingBox(this._x, this._y, this.width, this.height, this._angle)
 };
 
 Ship.prototype.wrapPosition = function (width, height) {
@@ -135,6 +198,8 @@ Ship.prototype.draw = function (context) {
 
     context.save();
 
+    this.drawBounds(context)
+
     context.translate(midPointX, midPointY);
     context.rotate(this._angle * Math.PI / 180);
     context.translate(-midPointX, -midPointY);
@@ -152,8 +217,28 @@ Ship.prototype.draw = function (context) {
         this.drawFlame(context);
     }
 
+
+
     context.restore();
 };
+
+Ship.prototype.drawBounds = function (context) {
+    context.save();
+
+    context.strokeStyle = '#ff0000';
+
+    var b = this.bounds;
+
+    context.beginPath();
+    context.moveTo(b.x, b.y);
+    context.lineTo(b.x + b.width, b.y);
+    context.lineTo(b.x + b.width, b.y + b.height);
+    context.lineTo(b.x, b.y + b.height);
+    context.lineTo(b.x, b.y);
+    context.stroke();
+
+    context.restore();
+}
 
 Ship.prototype.drawFlame = function (context) {
 
@@ -214,3 +299,12 @@ Ship.prototype.startEngine = function () {
 Ship.prototype.stopEngine = function () {
     this._enginePower = 0;
 };
+
+
+function* gapMaker(gap) {
+    var totalGap = 0;
+    while(true) {
+        totalGap = totalGap + gap;
+        yield totalGap;
+    }
+}
