@@ -44,6 +44,7 @@ Ship.prototype.onTouched = function (ent) {
     ]
 
     var xPositionChanged = false
+    var yPositionChanged = false
 
     vertices.forEach( (v) => {
         if (containsPoint(ent.bounds, v)) {
@@ -52,12 +53,34 @@ Ship.prototype.onTouched = function (ent) {
                     var referencePointX = ent.bounds.x + ent.bounds.width
                     var diff = referencePointX - b.x
 
-                    console.log('PRZESUN!')
                     this._x += diff
 
                     xPositionChanged = true
                 } else {
+                    var referencePointX = ent.bounds.x
+                    var diff = b.x + b.width - referencePointX
 
+                    this._x -= diff
+
+                    xPositionChanged = true
+                }
+            }
+
+            if (!yPositionChanged) {
+                if (this._velocityX < 0) {
+                    var referencePointY = ent.bounds.y + ent.bounds.height
+                    var diff = referencePointY - b.y
+
+                    this._y += diff
+
+                    yPositionChanged = true
+                } else {
+                    var referencePointY = ent.bounds.y
+                    var diff = b.y + b.height - referencePointY
+
+                    this._y -= diff
+
+                    yPositionChanged = true
                 }
             }
 
