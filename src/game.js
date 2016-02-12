@@ -1,5 +1,7 @@
 var canvas = document.getElementById('world');
 var ctx = canvas.getContext('2d');
+
+var containsPoint = require('./util').containsPoint
 var Ship = require('./ship')
 var Rock = require('./rock')
 
@@ -83,27 +85,7 @@ window.requestAnimationFrame(function loop (delta) {
     })
 });
 
-function containsPoint(rect, point) {
-    var rectMinX = rect.x
-    var rectMaxX = rect.x + rect.width
 
-    if (!isBetween(point.x, rectMinX, rectMaxX)) {
-        return false
-    }
-
-    var rectMinY = rect.y
-    var rectMaxY = rect.y + rect.height
-
-    if (!isBetween(point.y, rectMinY, rectMaxY)) {
-        return false
-    }
-
-    return true
-}
-
-function isBetween(value, min, max) {
-    return value >= min && value <= max
-}
 
 function hasCollision(ent1, ent2) {
     var bounds1 = ent1.bounds;
@@ -130,7 +112,7 @@ function checkCollisions(list) {
                 return;
             }
 
-            if (hasCollision(ent1, ent2)) {
+            if (hasCollision(ent1, ent2) || hasCollision(ent2, ent1)) {
                 ent1.onTouched(ent2);
             }
         })

@@ -1,3 +1,4 @@
+var drawBoundingBox = require('./config').drawBoundingBox
 /**
  *
  * @param options.x cannot be 0!
@@ -35,10 +36,25 @@ function Rock(options) {
 }
 
 Rock.prototype.onTouched = function (ent) {
-    this.shouldShrink = true
 
-    this.shouldGrow = true
-    this.nextGrow = 5000
+}
+
+Rock.prototype.drawBounds = function (context) {
+    context.save();
+
+    context.strokeStyle = '#ff0000';
+
+    var b = this.bounds;
+
+    context.beginPath();
+    context.moveTo(b.x, b.y);
+    context.lineTo(b.x + b.width, b.y);
+    context.lineTo(b.x + b.width, b.y + b.height);
+    context.lineTo(b.x, b.y + b.height);
+    context.lineTo(b.x, b.y);
+    context.stroke();
+
+    context.restore();
 }
 
 Rock.prototype.growBy = function (change) {
@@ -112,6 +128,10 @@ Rock.prototype.update = function (delta) {
 
 Rock.prototype.draw = function (context) {
     context.save();
+
+    if (drawBoundingBox) {
+        this.drawBounds(context)
+    }
 
     var grd = context.createLinearGradient(this._x, this._y, this._x + this.width, this._y + this.height);
     grd.addColorStop(0.3, this.colro);

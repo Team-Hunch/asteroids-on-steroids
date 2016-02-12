@@ -59,5 +59,28 @@ function calculateTriangleBoundingBox(x, y, w, h, angle) {
     }
 }
 
+function containsPoint(rect, point) {
+    var rectMinX = rect.x
+    var rectMaxX = rect.x + rect.width
+
+    if (!isBetween(point.x, rectMinX, rectMaxX)) {
+        return false
+    }
+
+    var rectMinY = rect.y
+    var rectMaxY = rect.y + rect.height
+
+    if (!isBetween(point.y, rectMinY, rectMaxY)) {
+        return false
+    }
+
+    return true
+}
+
+function isBetween(value, min, max) {
+    return value >= min && value <= max
+}
+
 exports.rotatePointAroundCenter = rotatePointAroundCenter
 exports.calculateTriangleBoundingBox = calculateTriangleBoundingBox
+exports.containsPoint = containsPoint

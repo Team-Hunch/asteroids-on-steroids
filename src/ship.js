@@ -1,4 +1,7 @@
+var drawBoundingBox = require('./config').drawBoundingBox
+
 var calculateTriangleBoundingBox = require('./util').calculateTriangleBoundingBox
+var containsPoint = require('./util').containsPoint
 
 function Ship(options) {
     this._x = 200;
@@ -27,6 +30,40 @@ function Ship(options) {
 }
 
 Ship.prototype.onTouched = function (ent) {
+
+    //this._velocityX = -this._velocityX
+    //this._velocityY = -this._velocityY
+
+    var b = this.bounds
+
+    var vertices = [
+        { x: b.x, y: b.y },
+        { x: b.x + b.width, y: b.y },
+        { x: b.x + b.width, y: b.y + b.height },
+        { x: b.x, y: b.y + b.height }
+    ]
+
+    var xPositionChanged = false
+
+    vertices.forEach( (v) => {
+        if (containsPoint(ent.bounds, v)) {
+            if (!xPositionChanged) {
+                if (this._velocityX < 0) {
+                    var referencePointX = ent.bounds.x + ent.bounds.width
+                    var diff = referencePointX - b.x
+
+                    console.log('PRZESUN!')
+                    this._x += diff
+
+                    xPositionChanged = true
+                } else {
+
+                }
+            }
+
+
+        }
+    })
 }
 
 Ship.prototype.applyEngineForce = function () {
@@ -81,7 +118,9 @@ Ship.prototype.draw = function (context) {
 
     context.save();
 
-    //this.drawBounds(context)
+    if (drawBoundingBox) {
+        this.drawBounds(context)
+    }
 
     context.translate(midPointX, midPointY);
     context.rotate(this._angle * Math.PI / 180);
@@ -101,8 +140,6 @@ Ship.prototype.draw = function (context) {
     if (this._engineRotating || this._enginePower > 0.5) {
         this.drawFlame(context);
     }
-
-
 
     context.restore();
 };
