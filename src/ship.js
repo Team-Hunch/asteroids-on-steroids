@@ -29,6 +29,14 @@ function Ship(options) {
     }
 }
 
+function distanceBetween(v1, v2) {
+    var xDist = v1.x - v2.x
+    var yDist = v1.y - v2.y
+
+    var pointDist = Math.sqrt(xDist * xDist + yDist * yDist)
+    return pointDist
+}
+
 Ship.prototype.onTouched = function (ent) {
 
     //this._velocityX = -this._velocityX
@@ -44,7 +52,9 @@ Ship.prototype.onTouched = function (ent) {
     ]
 
     var xPositionChanged = false
+    var xPositionDelta = null
     var yPositionChanged = false
+    var yPositionDelta = null
 
     vertices.forEach( (v) => {
         if (containsPoint(ent.bounds, v)) {
@@ -53,40 +63,52 @@ Ship.prototype.onTouched = function (ent) {
                     var referencePointX = ent.bounds.x + ent.bounds.width
                     var diff = referencePointX - b.x
 
-                    this._x += diff
+                    xPositionDelta = diff
 
                     xPositionChanged = true
                 } else {
                     var referencePointX = ent.bounds.x
                     var diff = b.x + b.width - referencePointX
 
-                    this._x -= diff
+                    xPositionDelta = -diff
 
                     xPositionChanged = true
                 }
             }
 
             if (!yPositionChanged) {
-                if (this._velocityX < 0) {
+                if (this._velocityY < 0) {
                     var referencePointY = ent.bounds.y + ent.bounds.height
                     var diff = referencePointY - b.y
 
-                    this._y += diff
+                    yPositionDelta = diff
 
                     yPositionChanged = true
                 } else {
                     var referencePointY = ent.bounds.y
                     var diff = b.y + b.height - referencePointY
 
-                    this._y -= diff
+                    yPositionDelta = -diff
 
                     yPositionChanged = true
                 }
             }
-
-
         }
     })
+
+    var v1 = { x: this._x + xPositionDelta, y: this._y }
+    var v2 = { x: this._x, y: this._y + yPositionDelta }
+
+    var dist1 = distanceBetween(v1, { x: this._x, y: this._y })
+    var dist2 = distanceBetween(v2, { x: this._x, y: this._y })
+
+    if (dist1 < dist2) {
+        this._x = v1.x
+        this._y = v1.y
+    } else {
+        this._x = v2.x
+        this._y = v2.y
+    }
 }
 
 Ship.prototype.applyEngineForce = function () {
@@ -101,7 +123,7 @@ Ship.prototype.applyEngineForce = function () {
 Ship.prototype.update = function (delta) {
     var timeScale = delta / 1000;
     var diffRotation = this.targetRotating - this._rotating;
-    this._rotating += (diffRotation * timeScale);
+    this._rotating += (diffRotation * timeScale * 3);
     this._angle += this._rotating * timeScale;
 
     this.applyEngineForce();
@@ -115,7 +137,7 @@ Ship.prototype.update = function (delta) {
     this._velocityX -= velocityXLossPerHalfSecond * timeScale * 2;
     this._velocityY -= velocityYLossPerHalfSecond * timeScale * 2;
 
-    this.wrapPosition(800, 600);
+    this.wrapPosition(1024, 768);
 
     this.bounds = calculateTriangleBoundingBox(this._x, this._y, this.width, this.height, this._angle)
 };

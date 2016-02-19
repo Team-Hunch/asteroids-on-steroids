@@ -78,7 +78,7 @@ window.requestAnimationFrame(function loop (delta) {
 
     lastDelta = delta
 
-    ctx.clearRect(0, 0, 800, 600);
+    ctx.clearRect(0, 0, 1024, 768);
 
     entities.forEach(function (ent) {
         ent.draw(ctx);
