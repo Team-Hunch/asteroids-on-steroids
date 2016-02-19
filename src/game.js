@@ -4,6 +4,7 @@ var ctx = canvas.getContext('2d');
 var containsPoint = require('./util').containsPoint
 var Ship = require('./ship')
 var Rock = require('./rock')
+var Emitter = require('./emitter')
 
 var ship = new Ship({
     width: 50,
@@ -19,6 +20,12 @@ var bordoRock = new Rock({
     colro: '#8C2807',
     darkerColro: '#401203'
 });
+
+var emitter = new Emitter({
+    x: 700,
+    y: 500,
+    ttl: 3
+})
 
 document.addEventListener('keyup', function(event) {
     switch (event.keyCode) {
@@ -64,6 +71,7 @@ var entities = [];
 entities.push(rock);
 entities.push(bordoRock);
 entities.push(ship);
+entities.push(emitter);
 
 window.requestAnimationFrame(function loop (delta) {
     window.requestAnimationFrame(loop);
@@ -90,6 +98,10 @@ window.requestAnimationFrame(function loop (delta) {
 function hasCollision(ent1, ent2) {
     var bounds1 = ent1.bounds;
     var bounds2 = ent2.bounds;
+
+    if (!bounds1 || !bounds2) {
+        return false
+    }
 
     var vertex = [
         { x: bounds2.x, y: bounds2.y },
@@ -118,5 +130,21 @@ function checkCollisions(list) {
         })
     })
 }
+
+var colros = ["#30D42A", "#6AB6F7", "#EFF700"]
+var ttls = [5, 2, 0.2, 2]
+
+setInterval(() => {
+    emitter._colro = colros[0]
+    var colro = colros.shift()
+    colros.push(colro)
+}, 500)
+
+
+setInterval(() => {
+    emitter._ttl = ttls[0]
+    var ttl = ttls.shift()
+    ttls.push(ttl)
+}, 700)
 
 
