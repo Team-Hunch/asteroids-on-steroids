@@ -1,3 +1,5 @@
+const events = require('./events')
+
 var drawBoundingBox = require('./config').drawBoundingBox
 
 var calculateTriangleBoundingBox = require('./util').calculateTriangleBoundingBox
@@ -38,6 +40,8 @@ function distanceBetween(v1, v2) {
 }
 
 Ship.prototype.onTouched = function (ent) {
+
+    events.emit('hit')
 
     //this._velocityX = -this._velocityX
     //this._velocityY = -this._velocityY

@@ -2,6 +2,7 @@ var canvas = document.getElementById('world');
 var ctx = canvas.getContext('2d');
 
 var containsPoint = require('./util').containsPoint
+var events = require('./events')
 var Ship = require('./ship')
 var Rock = require('./rock')
 var Emitter = require('./emitter')
@@ -26,6 +27,12 @@ var emitter = new Emitter({
     y: 500,
     ttl: 3
 })
+
+events.on('hit', () => {
+    emitter.enable(200)
+    emitter._x = ship._x
+    emitter._y = ship._y
+});
 
 document.addEventListener('keyup', function(event) {
     switch (event.keyCode) {
@@ -93,8 +100,6 @@ window.requestAnimationFrame(function loop (delta) {
     })
 });
 
-
-
 function hasCollision(ent1, ent2) {
     var bounds1 = ent1.bounds;
     var bounds2 = ent2.bounds;
@@ -134,17 +139,17 @@ function checkCollisions(list) {
 var colros = ["#30D42A", "#6AB6F7", "#EFF700"]
 var ttls = [5, 2, 0.2, 2]
 
-setInterval(() => {
-    emitter._colro = colros[0]
-    var colro = colros.shift()
-    colros.push(colro)
-}, 500)
-
-
-setInterval(() => {
-    emitter._ttl = ttls[0]
-    var ttl = ttls.shift()
-    ttls.push(ttl)
-}, 700)
+//setInterval(() => {
+//    emitter._colro = colros[0]
+//    var colro = colros.shift()
+//    colros.push(colro)
+//}, 500)
+//
+//
+//setInterval(() => {
+//    emitter._ttl = ttls[0]
+//    var ttl = ttls.shift()
+//    ttls.push(ttl)
+//}, 700)
 
 

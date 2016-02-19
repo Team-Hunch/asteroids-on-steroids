@@ -8,13 +8,21 @@ function Emitter(options) {
     this._alpha = options.alpha || 1.0
     this._ttl = options.ttl || 3.0
     this._angle = options.angle || 0
+    this._enabled = false
 
     this._particles = []
 }
 
 Emitter.prototype.update = function (delta) {
     for (var i = 0; i < 7; i++) {
-        this.emit()
+        if (this._enabled) {
+            this.emit()
+        }
+    }
+
+    this._duration -= delta
+    if (this._duration <= 0) {
+        this._enabled = false
     }
 
     this._particles = this._particles.filter(particle => {
@@ -50,6 +58,11 @@ Emitter.prototype.emit = function () {
     })
 
     this._particles.push(particle)
+}
+
+Emitter.prototype.enable = function (duration) {
+    this._enabled = true
+    this._duration = duration
 }
 
 module.exports = Emitter
