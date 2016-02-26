@@ -267,6 +267,10 @@ Ship.prototype.startEngine = function () {
     this._enginePower = 20;
 };
 
+Ship.prototype.reverse = function() {
+    this._enginePower = -20
+}
+
 Ship.prototype.stopEngine = function () {
     this._enginePower = 0;
 };

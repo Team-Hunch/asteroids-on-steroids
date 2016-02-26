@@ -50,6 +50,11 @@ document.addEventListener('keyup', function(event) {
             ship.stopEngine();
             break;
         }
+
+        case 40: {
+            ship.stopEngine()
+            break;
+        }
     }
 }, false);
 
@@ -68,6 +73,10 @@ document.addEventListener('keydown', function(event) {
         case 38: {
             ship.startEngine();
             break;
+        }
+
+        case 40: {
+            ship.reverse()
         }
     }
 }, false);
