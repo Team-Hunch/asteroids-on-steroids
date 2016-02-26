@@ -41,8 +41,6 @@ function distanceBetween(v1, v2) {
 
 Ship.prototype.onTouched = function (ent) {
 
-    events.emit('hit')
-
     //this._velocityX = -this._velocityX
     //this._velocityY = -this._velocityY
 
@@ -60,6 +58,8 @@ Ship.prototype.onTouched = function (ent) {
     var yPositionChanged = false
     var yPositionDelta = null
 
+    var relativePosition = []
+
     vertices.forEach( (v) => {
         if (containsPoint(ent.bounds, v)) {
             if (!xPositionChanged) {
@@ -70,6 +70,9 @@ Ship.prototype.onTouched = function (ent) {
                     xPositionDelta = diff
 
                     xPositionChanged = true
+
+                    relativePosition.push({ direction: 'right', deltaAbs: Math.abs(xPositionDelta)})
+
                 } else {
                     var referencePointX = ent.bounds.x
                     var diff = b.x + b.width - referencePointX
@@ -77,6 +80,8 @@ Ship.prototype.onTouched = function (ent) {
                     xPositionDelta = -diff
 
                     xPositionChanged = true
+
+                    relativePosition.push({ direction: 'left', deltaAbs: Math.abs(xPositionDelta)})
                 }
             }
 
@@ -88,6 +93,8 @@ Ship.prototype.onTouched = function (ent) {
                     yPositionDelta = diff
 
                     yPositionChanged = true
+
+                    relativePosition.push({ direction: 'down', deltaAbs: Math.abs(yPositionDelta)})
                 } else {
                     var referencePointY = ent.bounds.y
                     var diff = b.y + b.height - referencePointY
@@ -95,6 +102,8 @@ Ship.prototype.onTouched = function (ent) {
                     yPositionDelta = -diff
 
                     yPositionChanged = true
+
+                    relativePosition.push({ direction: 'up', deltaAbs: Math.abs(yPositionDelta)})
                 }
             }
         }
@@ -113,6 +122,8 @@ Ship.prototype.onTouched = function (ent) {
         this._x = v2.x
         this._y = v2.y
     }
+
+    events.emit('hit', relativePosition)
 }
 
 Ship.prototype.applyEngineForce = function () {
