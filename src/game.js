@@ -1,6 +1,7 @@
 var canvas = document.getElementById('world');
 var ctx = canvas.getContext('2d');
 
+var _ = require('lodash')
 var containsPoint = require('./util').containsPoint
 var events = require('./events')
 var Ship = require('./ship')
@@ -28,10 +29,36 @@ var emitter = new Emitter({
     ttl: 3
 })
 
-events.on('hit', () => {
+events.on('hit', (relativePosition) => {
     emitter.enable(200)
-    emitter._x = ship._x
-    emitter._y = ship._y
+
+    var positionFrom
+    if (relativePosition[0].deltaAbs < relativePosition[1].deltaAbs) {
+        positionFrom = relativePosition[0]
+    } else {
+        positionFrom = relativePosition[1]
+    }
+
+    switch(positionFrom.direction) {
+        case 'left':
+            emitter._x = ship._x + ship.height
+            emitter._y = ship._y + ship.width / 2
+            break;
+        case 'right':
+            emitter._x = ship._x
+            emitter._y = ship._y + ship.width / 2
+            break;
+        case 'up':
+            emitter._x = ship._x + ship.width / 2
+            emitter._y = ship._y + ship.height
+            break;
+        case 'down':
+            emitter._x = ship._x + ship.width / 2
+            emitter._y = ship._y
+            break;
+        default:
+            console.log('nothing matched!')
+    }
 });
 
 document.addEventListener('keyup', function(event) {
